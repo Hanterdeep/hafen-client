@@ -26,17 +26,17 @@
 
 package haven;
 
-import static haven.MCache.cmaps;
-import static haven.MCache.tilesz;
 import haven.MCache.Grid;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import haven.resutil.Ridges;
 
+import static haven.MCache.*;
+
 public class LocalMiniMap extends Widget {
     private static final Tex mapgrid = Resource.loadtex("gfx/hud/mmap/mapgrid");
-    public static final Coord VIEW_SZ = MCache.sgridsz.mul(9).div(tilesz);// view radius is 9x9 "server" grids
+    public static final Coord VIEW_SZ = MCache.sgridsz.mul(9).div(tilesz2);// view radius is 9x9 "server" grids
     public static final Color VIEW_BG_COLOR = new Color(255, 255, 255, 60);
     public static final Color VIEW_BORDER_COLOR = new Color(0, 0, 0, 128);
     public final MapView mv;
@@ -138,11 +138,11 @@ public class LocalMiniMap extends Widget {
     }
     
     public Coord p2c(Coord pc) {
-	return(pc.div(tilesz).sub(cc.add(off)).add(sz.div(2)));
+	return(pc.div(tilesz2).sub(cc.add(off)).add(sz.div(2)));
     }
 
     public Coord c2p(Coord c) {
-	return(c.sub(sz.div(2)).add(cc.add(off)).mul(tilesz).add(tilesz.div(2)));
+	return(c.sub(sz.div(2)).add(cc.add(off)).mul(tilesz2).add(tilesz2.div(2)));
     }
 
     public void drawicons(GOut g) {
@@ -153,7 +153,7 @@ public class LocalMiniMap extends Widget {
 		    continue;
 		}
 		try {
-		    Coord gc = p2c(marker.gob.rc);
+		    Coord gc = p2c(marker.gob.rc.round());
 		    Tex tex = marker.tex();
 		    if(tex != null) {
 			g.chcolor(marker.color());
@@ -190,7 +190,7 @@ public class LocalMiniMap extends Widget {
 		    }
 		    Tex tex = icon.tex();
 		    if(tex != null) {
-			Coord gc = p2c(gob.rc);
+			Coord gc = p2c(gob.rc.round());
 			Coord sz = tex.sz();
 			if(c.isect(gc.sub(sz.div(2)), sz))
 			    return (gob);
@@ -204,13 +204,13 @@ public class LocalMiniMap extends Widget {
     public void tick(double dt) {
 	Gob pl = ui.sess.glob.oc.getgob(mv.plgob);
 	if(pl == null)
-	    this.cc = mv.cc.div(tilesz);
+	    this.cc = mv.cc.round().div(tilesz2);
 	else
-	    this.cc = pl.rc.div(tilesz);
+	    this.cc = pl.rc.round().div(tilesz2);
 
 	Coord mc = rootxlate(ui.mc);
 	if(mc.isect(Coord.z, sz)) {
-	    setBiome(c2p(mc).div(tilesz));
+	    setBiome(c2p(mc).div(tilesz2));
 	} else {
 	    setBiome(cc);
 	}
@@ -291,7 +291,7 @@ public class LocalMiniMap extends Widget {
 	if(CFG.MMAP_VIEW.get()) {
 	    Gob pl = ui.sess.glob.oc.getgob(mv.plgob);
 	    if(pl != null) {
-		Coord rc = p2c(pl.rc.div(MCache.sgridsz).sub(4, 4).mul(MCache.sgridsz));
+		Coord rc = p2c(pl.rc.round().div(MCache.sgridsz).sub(4, 4).mul(MCache.sgridsz));
 		g.chcolor(VIEW_BG_COLOR);
 		g.frect(rc, VIEW_SZ);
 		g.chcolor(VIEW_BORDER_COLOR);
@@ -305,7 +305,7 @@ public class LocalMiniMap extends Widget {
 		for (Party.Member m : ui.sess.glob.party.memb.values()) {
 		    Coord ptc;
 		    try {
-			ptc = m.getc();
+			ptc = m.getc().round();
 		    } catch (MCache.LoadingMap e) {
 			ptc = null;
 		    }
@@ -321,7 +321,7 @@ public class LocalMiniMap extends Widget {
 	if(CFG.MMAP_SHOW_BIOMES.get()) {
 	    Coord mc = rootxlate(ui.mc);
 	    if(mc.isect(Coord.z, sz)) {
-		setBiome(c2p(mc).div(tilesz));
+		setBiome(c2p(mc).div(tilesz2));
 	    } else {
 		setBiome(cc);
 	    }

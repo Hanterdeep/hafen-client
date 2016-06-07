@@ -26,7 +26,7 @@
 
 package haven;
 
-import static haven.MCache.tilesz;
+import static haven.MCache.*;
 import static haven.OCache.posres;
 import haven.Resource.Tile;
 import haven.GLProgram.VarID;
@@ -1210,7 +1210,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			     cc.floor(tilesz).add(MCache.cutsz.mul(view + 1)));
         // change grid overlay position when player moves by 20 tiles
         if (showgrid) {
-            Coord tc = cc.div(MCache.tilesz);
+            Coord tc = cc.round().div(tilesz2);
             if (tc.manhattan2(lasttc) > 20) {
                 lasttc = tc;
                 gridol.update(tc.sub(MCache.cutsz.mul(view + 1)));
@@ -1678,7 +1678,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		    ol.destroy();
 		    mgrab.remove();
 		}
-		sc = mc.div(MCache.tilesz2);
+		sc = mc.div(tilesz2);
 		modflags = ui.modflags();
 		xl.mv = true;
 		mgrab = ui.grabmouse(MapView.this);
@@ -1690,7 +1690,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	public boolean mmouseup(Coord mc, int button) {
 	    synchronized(MapView.this) {
 		if(sc != null) {
-		    Coord ec = mc.div(MCache.tilesz2);
+		    Coord ec = mc.div(tilesz2);
 		    xl.mv = false;
 		    tt = null;
 		    ol.destroy();
@@ -1709,7 +1709,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	public void mmousemove(Coord mc) {
 	    synchronized(MapView.this) {
 		if(sc != null) {
-		    Coord tc = mc.div(MCache.tilesz2);
+		    Coord tc = mc.div(tilesz2);
 		    Coord c1 = new Coord(Math.min(tc.x, sc.x), Math.min(tc.y, sc.y));
 		    Coord c2 = new Coord(Math.max(tc.x, sc.x), Math.max(tc.y, sc.y));
 		    ol.update(c1, c2);
@@ -1816,7 +1816,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
     public void togglegrid() {
         showgrid = !showgrid;
         if (showgrid) {
-            Coord tc = cc.div(tilesz);
+            Coord tc = cc.round().div(tilesz2);
             lasttc = tc.div(MCache.cmaps);
             gridol.update(tc.sub(MCache.cutsz.mul(view + 1)));
         }
